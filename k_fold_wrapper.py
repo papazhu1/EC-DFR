@@ -34,6 +34,13 @@ class KFoldWapper(object):
     
     def fit(self,x,y,y_valid,error_threshold,resampling_rate):
         kf=RepeatedKFold(n_splits=self.n_fold,n_repeats=1,random_state=self.random_state)
+
+        # 困扰我的问题在weiping这里的实现方式是：
+        # 先将所有的训练样本分为了k折，每次拿k-1折作为训练样本
+        # 然后在每次对简单样本困难样本采样的时候，都是在这k-1折的训练样本中进行的
+        # 然后每次的增强向量都是在OOF折外样本中预测的
+
+        # 而我想的是分折前采样，这样就没有办法得到OOF样本的增强向量
         cv=[(t,v) for (t,v) in kf.split(x)]
         y_train_pred=np.zeros((x.shape[0],))
         for k in range(len(self.estimators)):

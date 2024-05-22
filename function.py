@@ -48,7 +48,8 @@ def resample(x,y,n_new,n_loop=1):
     return new_x,new_y
 
 def adjust_sample(x_train,y_train,y_pred,error_threshold,resampling_rate,n_loop=1):
-    
+
+    # 那alpha不就等于1 / (1 + error_threshold)
     a=1/(2*error_threshold+(1-error_threshold))
     s_r=resampling_rate*a-1
 
@@ -58,11 +59,17 @@ def adjust_sample(x_train,y_train,y_pred,error_threshold,resampling_rate,n_loop=
 
     hard_num=int(error_threshold*n_train)
     hard_index=rank_index[-hard_num:]
+
+    # x1, y1是困难样本，就是误差大的样本
     x1,y1=x_train[hard_index],y_train[hard_index]
+
+    # x2, y2是通过resample函数选中的困难样本
     x2,y2=resample(x1,y1,int(s_r*x1.shape[0]),n_loop)
 
     easy_num=int(a*n_train*(1-error_threshold))
     easy_index=random.sample(rank_index[0:-hard_num].tolist(),easy_num)
+
+    # x3, y3是通过采样选中的简单样本
     x3,y3=x_train[easy_index],y_train[easy_index]
 
     x_train,y_train=np.vstack((x1,x2,x3)),np.hstack((y1,y2,y3))
